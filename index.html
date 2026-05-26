@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MBL Park — Fechamento de Caixa</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-wrap">
+          <div class="logo-icon"><i class="ti ti-car-garage"></i></div>
+          <div class="logo-text">
+            <div class="brand">MBL PARK</div>
+            <div class="tagline">Estacionamentos</div>
+          </div>
+        </div>
+        <div class="login-sub">Sistema de Fechamento de Caixa</div>
+      </div>
+      <div class="login-body">
+        <h2>Acesse com seu pátio e senha</h2>
+        <div class="form-group">
+          <label>Pátio / perfil</label>
+          <select id="login-patio"><option value="">Carregando...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="login-senha" placeholder="Digite a senha"/>
+        </div>
+        <button class="btn-mbl" id="btn-entrar"><i class="ti ti-login"></i> Entrar</button>
+        <div class="error-msg" id="login-erro"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="screen">
+  <div class="app">
+
+    <div class="topbar">
+      <div class="tb-logo">
+        <div class="tb-icon"><i class="ti ti-car-garage"></i></div>
+        <div>
+          <div class="tb-brand">MBL PARK</div>
+          <div class="tb-sub" id="topbar-sub">Estacionamentos</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span id="topbar-badge"></span>
+        <button class="btn-logout" id="btn-sair"><i class="ti ti-logout"></i> Sair</button>
+      </div>
+    </div>
+
+    <!-- tabs operador -->
+    <div id="tabs-operador" class="tabs" style="display:none">
+      <button class="tab active" data-page="form"><i class="ti ti-plus"></i> Novo registro</button>
+      <button class="tab" data-page="registros"><i class="ti ti-list"></i> Meus registros</button>
+    </div>
+
+    <!-- tabs auditor -->
+    <div id="tabs-auditor" class="tabs" style="display:none">
+      <button class="tab active" data-page="auditoria"><i class="ti ti-list"></i> Registros</button>
+      <button class="tab" data-page="patios"><i class="ti ti-building"></i> Pátios</button>
+    </div>
+
+    <!-- PAGE: FORM -->
+    <div id="page-form" class="page active">
+      <div id="success-banner" class="success-banner" style="display:none">
+        <i class="ti ti-circle-check"></i><span>Registro salvo com sucesso!</span>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Identificação</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Nome do operador</label><input type="text" id="f-operador" placeholder="Nome completo"/></div>
+          <div class="form-group"><label>Supervisor responsável</label><input type="text" id="f-supervisor" placeholder="Nome do supervisor"/></div>
+          <div class="form-group"><label>Turno</label>
+            <select id="f-turno">
+              <option value="">Selecione</option>
+              <option value="1">Turno 1</option>
+              <option value="2">Turno 2</option>
+              <option value="3">Turno 3</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Data de abertura</label><input type="date" id="f-data"/></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Abertura de caixa</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Valor de abertura (R$)</label><input type="number" id="f-abertura" placeholder="0,00" step="0.01" min="0"/></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Movimento do caixa</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Dinheiro (R$)</label><input type="number" id="f-dinheiro" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>Crédito (R$)</label><input type="number" id="f-credito" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>Débito (R$)</label><input type="number" id="f-debito" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>PIX (R$)</label><input type="number" id="f-pix" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>Sem Parar (R$)</label><input type="number" id="f-semparar" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>Faturados (R$)</label><input type="number" id="f-faturados" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+          <div class="form-group"><label>Mensalista (R$)</label><input type="number" id="f-mensalista" placeholder="0,00" step="0.01" min="0" oninput="calcTotal()"/></div>
+        </div>
+        <div class="totais-grid">
+          <div class="total-card"><div class="lbl">Dinheiro</div><div class="val" id="t-dinheiro">R$ 0,00</div></div>
+          <div class="total-card"><div class="lbl">Cartões / Digital</div><div class="val" id="t-digital">R$ 0,00</div></div>
+          <div class="total-card dest"><div class="lbl">Valor total</div><div class="val" id="t-total">R$ 0,00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Fechamento de caixa</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Hora de fechamento</label><input type="time" id="f-hora"/></div>
+          <div class="form-group"><label>Operador de fechamento</label><input type="text" id="f-op-fechamento" placeholder="Nome do operador"/></div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>Observações</label>
+          <textarea id="f-obs" placeholder="Ocorrências, divergências ou informações relevantes..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Foto da ficha de fechamento</div>
+        <div class="upload-area" id="upload-area">
+          <i class="ti ti-camera"></i>
+          <p>Toque para tirar foto ou escolher da galeria</p>
+          <span>JPG, PNG — máx. 10MB</span>
+          <input type="file" id="f-foto" accept="image/*" capture="environment"/>
+        </div>
+        <div id="foto-preview" style="display:none">
+          <img id="foto-img" src="" alt="Foto da ficha"/>
+          <button class="btn-remover-foto" id="btn-remover-foto"><i class="ti ti-x"></i> Remover foto</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar registro</button>
+        <button class="btn-secondary" id="btn-limpar"><i class="ti ti-trash"></i> Limpar</button>
+      </div>
+    </div>
+
+    <!-- PAGE: REGISTROS DO PÁTIO -->
+    <div id="page-registros" class="page">
+      <div id="lista-patio"></div>
+    </div>
+
+    <!-- PAGE: AUDITORIA -->
+    <div id="page-auditoria" class="page">
+      <div class="card" style="margin-bottom:1rem">
+        <div class="filter-row">
+          <div class="form-group"><label>Pátio</label><input type="text" id="aud-filtro-patio" placeholder="Filtrar..."/></div>
+          <div class="form-group"><label>Turno</label>
+            <select id="aud-filtro-turno">
+              <option value="">Todos</option>
+              <option value="1">Turno 1</option>
+              <option value="2">Turno 2</option>
+              <option value="3">Turno 3</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Data</label><input type="date" id="aud-filtro-data"/></div>
+          <div class="form-group"><label>Status</label>
+            <select id="aud-filtro-status">
+              <option value="">Todos</option>
+              <option value="pendente">Pendente</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="rejeitado">Rejeitado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="lista-auditoria"></div>
+    </div>
+
+    <!-- PAGE: CADASTRO DE PÁTIOS -->
+    <div id="page-patios" class="page">
+      <div class="card">
+        <div class="section-title">Adicionar pátio</div>
+        <div class="add-form">
+          <div class="form-group"><label>Nome do pátio</label><input type="text" id="np-nome" placeholder="Ex: Pátio Centro"/></div>
+          <div class="form-group"><label>Código / ID</label><input type="text" id="np-id" placeholder="Ex: patio-centro"/></div>
+          <div class="form-group"><label>Senha de acesso</label><input type="text" id="np-senha" placeholder="Mínimo 6 caracteres"/></div>
+          <button class="btn-mbl" id="btn-add-patio" style="width:auto;white-space:nowrap"><i class="ti ti-plus"></i> Adicionar</button>
+        </div>
+        <div class="error-msg" id="patio-erro" style="text-align:left"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Pátios cadastrados</div>
+        <div class="search-row"><input type="text" id="busca-patio" placeholder="Buscar pátio..."/></div>
+        <div class="counter" id="counter-patios"></div>
+        <div style="overflow-x:auto">
+          <table class="patios-table">
+            <thead><tr><th>Nome</th><th>ID</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tabela-patios"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL FOTO -->
+<div id="modal-foto" class="modal" style="display:none">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="modal-titulo">Foto da ficha</span>
+      <button class="modal-close" id="modal-close"><i class="ti ti-x"></i></button>
+    </div>
+    <img id="modal-img" src="" alt="Foto da ficha" style="width:100%;border-radius:8px"/>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
