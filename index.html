@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div id="screen-login" class="screen active">
   <div class="login-wrap">
     <div class="login-card">
@@ -24,9 +24,9 @@
         <div class="login-sub">Sistema de Fechamento de Caixa</div>
       </div>
       <div class="login-body">
-        <h2>Acesse com seu pátio e senha</h2>
+        <h2>Acesse com seu perfil e senha</h2>
         <div class="form-group">
-          <label>Pátio / perfil</label>
+          <label>Perfil</label>
           <select id="login-patio"><option value="">Carregando...</option></select>
         </div>
         <div class="form-group">
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<!-- APP -->
+<!-- ===== APP ===== -->
 <div id="screen-app" class="screen">
   <div class="app">
 
@@ -58,48 +58,46 @@
       </div>
     </div>
 
-    <!-- tabs operador -->
+    <!-- TABS OPERADOR -->
     <div id="tabs-operador" class="tabs" style="display:none">
       <button class="tab active" data-page="form"><i class="ti ti-plus"></i> Novo registro</button>
       <button class="tab" data-page="registros"><i class="ti ti-list"></i> Meus registros</button>
     </div>
 
-    <!-- tabs auditor -->
+    <!-- TABS AUDITOR -->
     <div id="tabs-auditor" class="tabs" style="display:none">
       <button class="tab active" data-page="auditoria"><i class="ti ti-list"></i> Registros</button>
       <button class="tab" data-page="patios"><i class="ti ti-building"></i> Pátios</button>
+      <button class="tab" data-page="supervisores"><i class="ti ti-users"></i> Supervisores</button>
+      <button class="tab" data-page="config"><i class="ti ti-settings"></i> Configurações</button>
     </div>
 
-    <!-- PAGE: FORM -->
+    <!-- TABS SUPERVISOR -->
+    <div id="tabs-supervisor" class="tabs" style="display:none">
+      <button class="tab active" data-page="sup-registros"><i class="ti ti-list"></i> Registros</button>
+      <button class="tab" data-page="sup-config"><i class="ti ti-key"></i> Minha senha</button>
+    </div>
+
+    <!-- ===== PAGE: FORM ===== -->
     <div id="page-form" class="page active">
       <div id="success-banner" class="success-banner" style="display:none">
         <i class="ti ti-circle-check"></i><span>Registro salvo com sucesso!</span>
       </div>
-
       <div class="card">
         <div class="section-title">Identificação</div>
         <div class="form-grid">
           <div class="form-group"><label>Nome do operador</label><input type="text" id="f-operador" placeholder="Nome completo"/></div>
           <div class="form-group"><label>Supervisor responsável</label><input type="text" id="f-supervisor" placeholder="Nome do supervisor"/></div>
           <div class="form-group"><label>Turno</label>
-            <select id="f-turno">
-              <option value="">Selecione</option>
-              <option value="1">Turno 1</option>
-              <option value="2">Turno 2</option>
-              <option value="3">Turno 3</option>
-            </select>
+            <select id="f-turno"><option value="">Selecione</option><option value="1">Turno 1</option><option value="2">Turno 2</option><option value="3">Turno 3</option></select>
           </div>
           <div class="form-group"><label>Data de abertura</label><input type="date" id="f-data"/></div>
         </div>
       </div>
-
       <div class="card">
         <div class="section-title">Abertura de caixa</div>
-        <div class="form-grid">
-          <div class="form-group"><label>Valor de abertura (R$)</label><input type="number" id="f-abertura" placeholder="0,00" step="0.01" min="0"/></div>
-        </div>
+        <div class="form-group"><label>Valor de abertura (R$)</label><input type="number" id="f-abertura" placeholder="0,00" step="0.01" min="0" style="max-width:220px"/></div>
       </div>
-
       <div class="card">
         <div class="section-title">Movimento do caixa</div>
         <div class="form-grid">
@@ -117,19 +115,14 @@
           <div class="total-card dest"><div class="lbl">Valor total</div><div class="val" id="t-total">R$ 0,00</div></div>
         </div>
       </div>
-
       <div class="card">
         <div class="section-title">Fechamento de caixa</div>
         <div class="form-grid">
           <div class="form-group"><label>Hora de fechamento</label><input type="time" id="f-hora"/></div>
           <div class="form-group"><label>Operador de fechamento</label><input type="text" id="f-op-fechamento" placeholder="Nome do operador"/></div>
         </div>
-        <div class="form-group" style="margin-top:12px">
-          <label>Observações</label>
-          <textarea id="f-obs" placeholder="Ocorrências, divergências ou informações relevantes..."></textarea>
-        </div>
+        <div class="form-group" style="margin-top:12px"><label>Observações</label><textarea id="f-obs" placeholder="Ocorrências, divergências ou informações relevantes..."></textarea></div>
       </div>
-
       <div class="card">
         <div class="section-title">Foto da ficha de fechamento</div>
         <div class="upload-area" id="upload-area">
@@ -143,46 +136,31 @@
           <button class="btn-remover-foto" id="btn-remover-foto"><i class="ti ti-x"></i> Remover foto</button>
         </div>
       </div>
-
       <div class="actions">
         <button class="btn-primary" id="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar registro</button>
         <button class="btn-secondary" id="btn-limpar"><i class="ti ti-trash"></i> Limpar</button>
       </div>
     </div>
 
-    <!-- PAGE: REGISTROS DO PÁTIO -->
+    <!-- ===== PAGE: REGISTROS DO PÁTIO ===== -->
     <div id="page-registros" class="page">
       <div id="lista-patio"></div>
     </div>
 
-    <!-- PAGE: AUDITORIA -->
+    <!-- ===== PAGE: AUDITORIA ===== -->
     <div id="page-auditoria" class="page">
       <div class="card" style="margin-bottom:1rem">
         <div class="filter-row">
           <div class="form-group"><label>Pátio</label><input type="text" id="aud-filtro-patio" placeholder="Filtrar..."/></div>
-          <div class="form-group"><label>Turno</label>
-            <select id="aud-filtro-turno">
-              <option value="">Todos</option>
-              <option value="1">Turno 1</option>
-              <option value="2">Turno 2</option>
-              <option value="3">Turno 3</option>
-            </select>
-          </div>
+          <div class="form-group"><label>Turno</label><select id="aud-filtro-turno"><option value="">Todos</option><option value="1">Turno 1</option><option value="2">Turno 2</option><option value="3">Turno 3</option></select></div>
           <div class="form-group"><label>Data</label><input type="date" id="aud-filtro-data"/></div>
-          <div class="form-group"><label>Status</label>
-            <select id="aud-filtro-status">
-              <option value="">Todos</option>
-              <option value="pendente">Pendente</option>
-              <option value="aprovado">Aprovado</option>
-              <option value="rejeitado">Rejeitado</option>
-            </select>
-          </div>
+          <div class="form-group"><label>Status</label><select id="aud-filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="rejeitado">Rejeitado</option></select></div>
         </div>
       </div>
       <div id="lista-auditoria"></div>
     </div>
 
-    <!-- PAGE: CADASTRO DE PÁTIOS -->
+    <!-- ===== PAGE: PÁTIOS ===== -->
     <div id="page-patios" class="page">
       <div class="card">
         <div class="section-title">Adicionar pátio</div>
@@ -207,10 +185,81 @@
       </div>
     </div>
 
+    <!-- ===== PAGE: SUPERVISORES ===== -->
+    <div id="page-supervisores" class="page">
+      <div class="card">
+        <div class="section-title">Adicionar supervisor</div>
+        <div class="add-form">
+          <div class="form-group"><label>Nome</label><input type="text" id="sn-nome" placeholder="Nome completo"/></div>
+          <div class="form-group"><label>ID de acesso</label><input type="text" id="sn-id" placeholder="Ex: supervisor-joao"/></div>
+          <div class="form-group"><label>Senha</label><input type="text" id="sn-senha" placeholder="Mínimo 6 caracteres"/></div>
+          <button class="btn-mbl" id="btn-add-supervisor" style="width:auto;white-space:nowrap"><i class="ti ti-plus"></i> Adicionar</button>
+        </div>
+        <div class="form-group" style="margin-top:4px">
+          <label>Pátios sob responsabilidade deste supervisor</label>
+          <div id="patios-check-list" class="patios-check-wrap"></div>
+        </div>
+        <div class="error-msg" id="supervisor-erro" style="text-align:left"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Supervisores cadastrados</div>
+        <div class="counter" id="counter-supervisores"></div>
+        <div style="overflow-x:auto">
+          <table class="patios-table">
+            <thead><tr><th>Nome</th><th>ID</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tabela-supervisores"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: CONFIG (AUDITOR) ===== -->
+    <div id="page-config" class="page">
+      <div class="card" style="max-width:400px">
+        <div class="section-title">Alterar senha do auditor</div>
+        <div id="cfg-sucesso" class="success-banner" style="display:none;margin-bottom:1rem">
+          <i class="ti ti-circle-check"></i><span>Senha alterada com sucesso!</span>
+        </div>
+        <div class="form-group"><label>Senha atual</label><input type="password" id="cfg-senha-atual" placeholder="Digite a senha atual"/></div>
+        <div class="form-group"><label>Nova senha</label><input type="password" id="cfg-senha-nova" placeholder="Mínimo 6 caracteres"/></div>
+        <div class="form-group"><label>Confirmar nova senha</label><input type="password" id="cfg-senha-conf" placeholder="Repita a nova senha"/></div>
+        <div class="error-msg" id="cfg-erro" style="text-align:left"></div>
+        <div class="actions"><button class="btn-primary" id="btn-salvar-senha-auditor"><i class="ti ti-key"></i> Salvar nova senha</button></div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: REGISTROS SUPERVISOR ===== -->
+    <div id="page-sup-registros" class="page">
+      <div class="card" style="margin-bottom:1rem">
+        <div class="filter-row">
+          <div class="form-group"><label>Pátio</label><input type="text" id="sup-filtro-patio" placeholder="Filtrar..."/></div>
+          <div class="form-group"><label>Turno</label><select id="sup-filtro-turno"><option value="">Todos</option><option value="1">Turno 1</option><option value="2">Turno 2</option><option value="3">Turno 3</option></select></div>
+          <div class="form-group"><label>Data</label><input type="date" id="sup-filtro-data"/></div>
+          <div class="form-group"><label>Status</label><select id="sup-filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="rejeitado">Rejeitado</option></select></div>
+        </div>
+      </div>
+      <div id="lista-sup-registros"></div>
+    </div>
+
+    <!-- ===== PAGE: CONFIG SUPERVISOR ===== -->
+    <div id="page-sup-config" class="page">
+      <div class="card" style="max-width:400px">
+        <div class="section-title">Alterar minha senha</div>
+        <div id="scfg-sucesso" class="success-banner" style="display:none;margin-bottom:1rem">
+          <i class="ti ti-circle-check"></i><span>Senha alterada com sucesso!</span>
+        </div>
+        <div class="form-group"><label>Senha atual</label><input type="password" id="scfg-senha-atual" placeholder="Digite a senha atual"/></div>
+        <div class="form-group"><label>Nova senha</label><input type="password" id="scfg-senha-nova" placeholder="Mínimo 6 caracteres"/></div>
+        <div class="form-group"><label>Confirmar nova senha</label><input type="password" id="scfg-senha-conf" placeholder="Repita a nova senha"/></div>
+        <div class="error-msg" id="scfg-erro" style="text-align:left"></div>
+        <div class="actions"><button class="btn-primary" id="btn-salvar-senha-sup"><i class="ti ti-key"></i> Salvar nova senha</button></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- MODAL FOTO -->
+<!-- MODAL: FOTO -->
 <div id="modal-foto" class="modal" style="display:none">
   <div class="modal-backdrop" id="modal-backdrop"></div>
   <div class="modal-box">
@@ -222,7 +271,45 @@
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- MODAL: EDIÇÃO -->
+<div id="modal-edicao" class="modal" style="display:none">
+  <div class="modal-backdrop" id="modal-edicao-backdrop"></div>
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-header">
+      <span>Editar fechamento</span>
+      <button class="modal-close" id="modal-edicao-close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label>Operador</label><input type="text" id="e-operador"/></div>
+      <div class="form-group"><label>Supervisor</label><input type="text" id="e-supervisor"/></div>
+      <div class="form-group"><label>Turno</label><select id="e-turno"><option value="">—</option><option value="1">Turno 1</option><option value="2">Turno 2</option><option value="3">Turno 3</option></select></div>
+      <div class="form-group"><label>Data</label><input type="date" id="e-data"/></div>
+      <div class="form-group"><label>Valor abertura</label><input type="number" id="e-abertura" step="0.01" min="0"/></div>
+    </div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label>Dinheiro</label><input type="number" id="e-dinheiro" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>Crédito</label><input type="number" id="e-credito" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>Débito</label><input type="number" id="e-debito" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>PIX</label><input type="number" id="e-pix" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>Sem Parar</label><input type="number" id="e-semparar" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>Faturados</label><input type="number" id="e-faturados" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+      <div class="form-group"><label>Mensalista</label><input type="number" id="e-mensalista" step="0.01" min="0" oninput="calcTotalEdit()"/></div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text2)">Total</span>
+      <span style="font-size:18px;font-weight:600;color:var(--laranja)" id="e-total">R$ 0,00</span>
+    </div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label>Hora fechamento</label><input type="time" id="e-hora"/></div>
+      <div class="form-group"><label>Operador fechamento</label><input type="text" id="e-op-fechamento"/></div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px"><label>Observações</label><textarea id="e-obs"></textarea></div>
+    <div class="actions">
+      <button class="btn-primary" id="btn-salvar-edicao"><i class="ti ti-device-floppy"></i> Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>
