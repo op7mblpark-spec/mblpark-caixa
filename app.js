@@ -192,6 +192,7 @@ function showPage(page, btn) {
   if (page === "config")        renderConfig();
   if (page === "sup-registros") renderSupRegistros();
   if (page === "sup-config")    renderSupConfig();
+  if (page === "relatorios")    renderRelatorios();
 }
 
 // ── calcular total do form de edição ──────────────────────────────────────────
@@ -672,3 +673,310 @@ document.getElementById("busca-patio")?.addEventListener("input", renderPatios);
 
 // ── init ───────────────────────────────────────────────────────────────────────
 buildLoginSelect();
+
+// ═══════════════════════════════════════════════════════════
+//  MÓDULO DE RELATÓRIOS — PDF e Excel
+// ═══════════════════════════════════════════════════════════
+
+// ── carregar bibliotecas externas ─────────────────────────
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement("script");
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── buscar todos os registros para o relatório ─────────────
+async function buscarRegistrosRelatorio(patioFiltro) {
+  const snap = await getDocs(query(collection(db, "registros"), orderBy("criadoEm", "desc")));
+  const lista = [];
+  snap.forEach(d => {
+    const r = { id: d.id, ...d.data() };
+    if (patioFiltro && r.patio !== patioFiltro) return;
+    lista.push(r);
+  });
+  return lista;
+}
+
+// ── montar resumo por pátio ────────────────────────────────
+function montarResumo(registros) {
+  const map = {};
+  registros.forEach(r => {
+    const key = r.patioLabel || r.patio;
+    if (!map[key]) map[key] = { patio: key, total: 0, dinheiro: 0, credito: 0, debito: 0, pix: 0, semParar: 0, faturados: 0, mensalista: 0, count: 0, aprovados: 0, pendentes: 0, rejeitados: 0 };
+    const m = map[key];
+    m.total      += parseFloat(r.total || 0);
+    m.dinheiro   += parseFloat(r.dinheiro || 0);
+    m.credito    += parseFloat(r.credito || 0);
+    m.debito     += parseFloat(r.debito || 0);
+    m.pix        += parseFloat(r.pix || 0);
+    m.semParar   += parseFloat(r.semParar || 0);
+    m.faturados  += parseFloat(r.faturados || 0);
+    m.mensalista += parseFloat(r.mensalista || 0);
+    m.count++;
+    if (r.status === "aprovado")   m.aprovados++;
+    else if (r.status === "rejeitado") m.rejeitados++;
+    else m.pendentes++;
+  });
+  return Object.values(map).sort((a, b) => a.patio.localeCompare(b.patio));
+}
+
+// ── gerar EXCEL ────────────────────────────────────────────
+window.gerarExcel = async function(patioFiltro) {
+  const btn = document.getElementById("btn-excel");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Gerando...'; }
+
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");
+    const registros = await buscarRegistrosRelatorio(patioFiltro);
+    if (!registros.length) { alert("Nenhum registro encontrado."); return; }
+
+    const wb = XLSX.utils.book_new();
+    const dataGeracao = new Date().toLocaleString("pt-BR");
+
+    // ── aba 1: RESUMO POR PÁTIO ──────────────────────────
+    const resumo = montarResumo(registros);
+    const totalGeral = resumo.reduce((s, r) => s + r.total, 0);
+
+    const resumoData = [
+      ["MBL PARK — RELATÓRIO DE FECHAMENTO DE CAIXA"],
+      [`Gerado em: ${dataGeracao}`],
+      [],
+      ["RESUMO POR PÁTIO"],
+      ["Pátio", "Fechamentos", "Aprovados", "Pendentes", "Rejeitados", "Dinheiro", "Crédito", "Débito", "PIX", "Sem Parar", "Faturados", "Mensalista", "TOTAL"],
+      ...resumo.map(r => [
+        r.patio, r.count, r.aprovados, r.pendentes, r.rejeitados,
+        r.dinheiro, r.credito, r.debito, r.pix, r.semParar, r.faturados, r.mensalista, r.total
+      ]),
+      [],
+      ["", "", "", "", "TOTAL GERAL", "", "", "", "", "", "", "", totalGeral]
+    ];
+
+    const wsResumo = XLSX.utils.aoa_to_sheet(resumoData);
+
+    // larguras das colunas
+    wsResumo["!cols"] = [
+      {wch:22},{wch:12},{wch:11},{wch:11},{wch:11},
+      {wch:13},{wch:13},{wch:13},{wch:13},{wch:13},{wch:13},{wch:13},{wch:14}
+    ];
+
+    // formatar células de valor como moeda
+    const moedaFmt = 'R$ #,##0.00';
+    const colsMoeda = [5,6,7,8,9,10,11,12];
+    resumo.forEach((_, rowIdx) => {
+      const row = rowIdx + 5;
+      colsMoeda.forEach(col => {
+        const cell = XLSX.utils.encode_cell({ r: row, c: col });
+        if (wsResumo[cell]) wsResumo[cell].z = moedaFmt;
+      });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo por Pátio");
+
+    // ── aba 2: DETALHADO ─────────────────────────────────
+    const detalheData = [
+      ["MBL PARK — FECHAMENTOS DETALHADOS"],
+      [`Gerado em: ${dataGeracao}  |  Total de registros: ${registros.length}`],
+      [],
+      ["Data", "Pátio", "Turno", "Operador", "Supervisor", "Status",
+       "Abertura", "Dinheiro", "Crédito", "Débito", "PIX", "Sem Parar", "Faturados", "Mensalista", "TOTAL",
+       "Hora Fechamento", "Op. Fechamento", "Observações"],
+      ...registros.map(r => [
+        r.data ? new Date(r.data + "T12:00:00").toLocaleDateString("pt-BR") : "",
+        r.patioLabel || r.patio,
+        r.turno === "1" ? "Turno 1" : r.turno === "2" ? "Turno 2" : "Turno 3",
+        r.operador || "",
+        r.supervisor || "",
+        r.status === "aprovado" ? "Aprovado" : r.status === "rejeitado" ? "Rejeitado" : "Pendente",
+        parseFloat(r.valorAbertura || 0),
+        parseFloat(r.dinheiro || 0),
+        parseFloat(r.credito || 0),
+        parseFloat(r.debito || 0),
+        parseFloat(r.pix || 0),
+        parseFloat(r.semParar || 0),
+        parseFloat(r.faturados || 0),
+        parseFloat(r.mensalista || 0),
+        parseFloat(r.total || 0),
+        r.horaFechamento || "",
+        r.opFechamento || "",
+        r.obs || ""
+      ])
+    ];
+
+    const wsDetalhe = XLSX.utils.aoa_to_sheet(detalheData);
+    wsDetalhe["!cols"] = [
+      {wch:12},{wch:22},{wch:9},{wch:20},{wch:20},{wch:11},
+      {wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:14},
+      {wch:14},{wch:20},{wch:30}
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsDetalhe, "Detalhado");
+
+    // download
+    const nomeArquivo = `MBLPark_Relatorio_${new Date().toISOString().split("T")[0]}.xlsx`;
+    XLSX.writeFile(wb, nomeArquivo);
+
+  } catch(e) {
+    alert("Erro ao gerar Excel: " + e.message);
+    console.error(e);
+  }
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-file-spreadsheet"></i> Baixar Excel'; }
+};
+
+// ── gerar PDF ──────────────────────────────────────────────
+window.gerarPDF = async function(patioFiltro) {
+  const btn = document.getElementById("btn-pdf");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Gerando...'; }
+
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+
+    const { jsPDF } = window.jspdf;
+    const registros  = await buscarRegistrosRelatorio(patioFiltro);
+    if (!registros.length) { alert("Nenhum registro encontrado."); return; }
+
+    const resumo     = montarResumo(registros);
+    const totalGeral = resumo.reduce((s, r) => s + r.total, 0);
+    const dataGeracao = new Date().toLocaleString("pt-BR");
+
+    const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    const W   = pdf.internal.pageSize.getWidth();
+
+    const laranja = [232, 98, 10];
+    const preto   = [26, 26, 26];
+    const branco  = [255, 255, 255];
+    const cinzaClaro = [248, 247, 244];
+
+    function cabecalho(titulo) {
+      // fundo preto topo
+      pdf.setFillColor(...preto);
+      pdf.rect(0, 0, W, 18, "F");
+      pdf.setTextColor(...branco);
+      pdf.setFontSize(13); pdf.setFont("helvetica","bold");
+      pdf.text("MBL PARK — ESTACIONAMENTOS", 14, 8);
+      pdf.setFontSize(8); pdf.setFont("helvetica","normal");
+      pdf.text(titulo, 14, 13);
+      pdf.text(`Gerado em: ${dataGeracao}`, W - 14, 13, { align: "right" });
+      pdf.setTextColor(0, 0, 0);
+    }
+
+    // ── PÁGINA 1: RESUMO ──────────────────────────────────
+    cabecalho("RELATÓRIO DE FECHAMENTO DE CAIXA — RESUMO POR PÁTIO");
+
+    pdf.setFontSize(10); pdf.setFont("helvetica","bold");
+    pdf.setTextColor(...laranja);
+    pdf.text("RESUMO POR PÁTIO", 14, 26);
+    pdf.setTextColor(0,0,0);
+
+    pdf.autoTable({
+      startY: 30,
+      head: [["Pátio", "Fechamentos", "Aprovados", "Pendentes", "Dinheiro", "Crédito", "Débito", "PIX", "Sem Parar", "Faturados", "Mensalista", "TOTAL"]],
+      body: [
+        ...resumo.map(r => [
+          r.patio, r.count, r.aprovados, r.pendentes,
+          fmt(r.dinheiro), fmt(r.credito), fmt(r.debito), fmt(r.pix),
+          fmt(r.semParar), fmt(r.faturados), fmt(r.mensalista), fmt(r.total)
+        ]),
+        ["", "", "", "TOTAL GERAL", "", "", "", "", "", "", "", { content: fmt(totalGeral), styles: { fontStyle: "bold", textColor: laranja } }]
+      ],
+      styles: { fontSize: 8, cellPadding: 2.5 },
+      headStyles: { fillColor: preto, textColor: branco, fontStyle: "bold", fontSize: 8 },
+      alternateRowStyles: { fillColor: cinzaClaro },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        11: { fontStyle: "bold" }
+      },
+      margin: { left: 14, right: 14 }
+    });
+
+    // totalizador no fim
+    const finalY = pdf.lastAutoTable.finalY + 6;
+    pdf.setFillColor(...laranja);
+    pdf.roundedRect(14, finalY, W - 28, 12, 2, 2, "F");
+    pdf.setTextColor(...branco);
+    pdf.setFont("helvetica","bold"); pdf.setFontSize(9);
+    pdf.text(`Total de registros: ${registros.length}     |     Pátios: ${resumo.length}     |     Valor total geral: ${fmt(totalGeral)}`, W / 2, finalY + 7.5, { align: "center" });
+    pdf.setTextColor(0,0,0);
+
+    // ── PÁGINA 2+: DETALHADO ──────────────────────────────
+    pdf.addPage();
+    cabecalho("FECHAMENTOS DETALHADOS");
+
+    pdf.setFontSize(10); pdf.setFont("helvetica","bold");
+    pdf.setTextColor(...laranja);
+    pdf.text("FECHAMENTOS DETALHADOS", 14, 26);
+    pdf.setTextColor(0,0,0);
+
+    pdf.autoTable({
+      startY: 30,
+      head: [["Data", "Pátio", "Turno", "Operador", "Status", "Dinheiro", "Crédito", "Débito", "PIX", "Sem Parar", "Fat.", "Mensal.", "TOTAL", "Obs."]],
+      body: registros.map(r => [
+        r.data ? new Date(r.data+"T12:00:00").toLocaleDateString("pt-BR") : "",
+        r.patioLabel || r.patio,
+        r.turno === "1" ? "T1" : r.turno === "2" ? "T2" : "T3",
+        r.operador || "",
+        r.status === "aprovado" ? "✓ Aprov." : r.status === "rejeitado" ? "✗ Rejeit." : "⏳ Pend.",
+        fmt(r.dinheiro), fmt(r.credito), fmt(r.debito), fmt(r.pix),
+        fmt(r.semParar), fmt(r.faturados), fmt(r.mensalista), fmt(r.total),
+        (r.obs || "").slice(0, 30)
+      ]),
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor: preto, textColor: branco, fontStyle: "bold", fontSize: 7 },
+      alternateRowStyles: { fillColor: cinzaClaro },
+      columnStyles: {
+        0: { cellWidth: 18 },
+        1: { cellWidth: 32 },
+        2: { cellWidth: 10 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 18 },
+        12: { fontStyle: "bold" },
+        13: { cellWidth: 30 }
+      },
+      margin: { left: 14, right: 14 }
+    });
+
+    // rodapé em todas as páginas
+    const totalPags = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPags; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(7); pdf.setFont("helvetica","normal");
+      pdf.setTextColor(150,150,150);
+      pdf.text(`MBL Park Estacionamentos — Página ${i} de ${totalPags}`, W / 2, pdf.internal.pageSize.getHeight() - 5, { align: "center" });
+    }
+
+    const nomeArquivo = `MBLPark_Relatorio_${new Date().toISOString().split("T")[0]}.pdf`;
+    pdf.save(nomeArquivo);
+
+  } catch(e) {
+    alert("Erro ao gerar PDF: " + e.message);
+    console.error(e);
+  }
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-file-type-pdf"></i> Baixar PDF'; }
+};
+
+// ── render página de relatórios ────────────────────────────
+window.renderRelatorios = async function() {
+  const el = document.getElementById("lista-patios-rel");
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando pátios...</div>';
+  try {
+    const snap = await getDocs(collection(db, "patios"));
+    const patios = []; snap.forEach(d => patios.push({ id: d.id, ...d.data() }));
+    el.innerHTML = patios.map(p => `
+      <div class="rel-patio-item">
+        <div>
+          <div style="font-size:14px;font-weight:500">${p.nome}</div>
+          <div style="font-size:12px;color:var(--text2)">${p.id}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="gerarExcel('${p.id}')"><i class="ti ti-file-spreadsheet"></i> Excel</button>
+          <button class="btn-sm" onclick="gerarPDF('${p.id}')"><i class="ti ti-file-type-pdf"></i> PDF</button>
+        </div>
+      </div>`).join("") || '<div class="empty"><i class="ti ti-inbox"></i><p>Nenhum pátio cadastrado.</p></div>';
+  } catch(e) { el.innerHTML = '<div class="empty"><p>Erro ao carregar pátios.</p></div>'; }
+};
