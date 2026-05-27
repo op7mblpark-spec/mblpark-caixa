@@ -160,3 +160,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .add-form{grid-template-columns:1fr}
   .topbar-right .badge-patio,.topbar-right .badge-auditor{display:none}
 }
+
+/* ===== NOVOS ESTILOS v3 ===== */
+.badge-supervisor{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(99,153,34,0.2);color:#3B6D11}
+.btn-aprovar{padding:7px 14px;border-radius:var(--rs);border:none;background:#16A34A;color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.btn-rejeitar{padding:7px 14px;border-radius:var(--rs);border:none;background:#DC2626;color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.btn-ver-foto{padding:7px 14px;border-radius:var(--rs);border:1px solid var(--border);background:#fff;color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.status-reg{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.s-pendente{background:#FEF9C3;color:#854D0E}
+.s-aprovado{background:#F0FDF4;color:#16A34A}
+.s-rejeitado{background:#FEF2F2;color:#DC2626}
+.reg-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:2rem;text-align:center;cursor:pointer;position:relative;transition:border-color .15s;background:var(--bg)}
+.upload-area:hover{border-color:var(--laranja)}
+.upload-area i{font-size:32px;color:var(--laranja);display:block;margin-bottom:8px}
+.upload-area p{font-size:14px;color:var(--text);margin-bottom:4px}
+.upload-area span{font-size:12px;color:var(--text2)}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+#foto-preview img{width:100%;max-height:300px;object-fit:contain;border-radius:var(--rs);border:1px solid var(--border)}
+.btn-remover-foto{margin-top:8px;padding:6px 14px;border-radius:var(--rs);border:1px solid #FCA5A5;background:transparent;color:#DC2626;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
+.modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7)}
+.modal-box{position:relative;background:#fff;border-radius:var(--r);padding:1.25rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;z-index:1}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.modal-header span{font-size:15px;font-weight:500}
+.modal-close{width:32px;height:32px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.patios-check-wrap{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;background:var(--bg)}
+.loading{text-align:center;padding:2rem;color:var(--text2);font-size:14px}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
