@@ -12,12 +12,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL }
 
 // ─── COLE AQUI AS SUAS CREDENCIAIS DO FIREBASE ───────────────────────────────
 const firebaseConfig = {
-  apiKey:            "COLE_AQUI",
-  authDomain:        "COLE_AQUI",
-  projectId:         "COLE_AQUI",
-  storageBucket:     "COLE_AQUI",
-  messagingSenderId: "COLE_AQUI",
-  appId:             "COLE_AQUI"
+  apiKey: "AIzaSyC5R7nLSjfRFXAqEYp_81Ok423dYBT_N10",
+  apiKey: "AIzaSyC5R7nLSjfRFXAqEYp_81Ok423dYBT_N10",
+  projectId: "mblpark-caixa",
+  storageBucket: "mblpark-caixa.firebasestorage.app",
+  messagingSenderId: "23435855351",
+  appId: "1:23435855351:web:6ef7f8f700dc9b38f65af2"
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
