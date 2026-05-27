@@ -189,3 +189,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .loading{text-align:center;padding:2rem;color:var(--text2);font-size:14px}
 .spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== RELATÓRIOS ===== */
+.rel-patio-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.rel-patio-item:last-child{border-bottom:none}
