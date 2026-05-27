@@ -70,6 +70,7 @@
       <button class="tab" data-page="patios"><i class="ti ti-building"></i> Pátios</button>
       <button class="tab" data-page="supervisores"><i class="ti ti-users"></i> Supervisores</button>
       <button class="tab" data-page="config"><i class="ti ti-settings"></i> Configurações</button>
+      <button class="tab" data-page="relatorios"><i class="ti ti-chart-bar"></i> Relatórios</button>
     </div>
 
     <!-- TABS SUPERVISOR -->
@@ -259,7 +260,24 @@
   </div>
 </div>
 
-<!-- MODAL: FOTO -->
+<!-- ===== PAGE: RELATÓRIOS ===== -->
+    <div id="page-relatorios" class="page">
+      <div class="card">
+        <div class="section-title">Relatório geral — todos os pátios</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Exporta todos os fechamentos de todos os pátios em um único arquivo.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-primary" id="btn-excel" onclick="gerarExcel()"><i class="ti ti-file-spreadsheet"></i> Baixar Excel</button>
+          <button class="btn-secondary" id="btn-pdf" onclick="gerarPDF()"><i class="ti ti-file-type-pdf"></i> Baixar PDF</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Relatório por pátio</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Selecione um pátio para exportar apenas os fechamentos dele.</p>
+        <div id="lista-patios-rel"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: FOTO -->
 <div id="modal-foto" class="modal" style="display:none">
   <div class="modal-backdrop" id="modal-backdrop"></div>
   <div class="modal-box">
